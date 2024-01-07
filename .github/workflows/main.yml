@@ -1,4 +1,4 @@
-name: Node.js CI/CD
+name: Lambda Deploy
 
 on:
   push:
@@ -10,9 +10,8 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
-      - name: CHECK-OUT GIT REPOSITORY
+      - name: Checkout github repository
         uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
@@ -20,5 +19,15 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: ap-south-1
       - run: npm ci
       - run: npm run build
+      - name: Creating a Zip
+        run: zip -j lambda.zip ./dist/*
+      - name: Deploying to Lambda
+        run: aws lambda update-function-code --function-name myFunction1 --zip-file fileb://lambda.zip
