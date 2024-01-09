@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import generateRandom from './generateRandom';
+import randomString from 'randomstring';
 export const handler = async (event: APIGatewayProxyEvent) => {
-	const randomNumber = generateRandom();
+	const randomNumber = randomString.generate();
 	const response = {
 		statusCode: 200,
 		body: JSON.stringify('Hello World from lambda! ' + randomNumber),
